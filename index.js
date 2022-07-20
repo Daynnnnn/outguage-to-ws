@@ -37,10 +37,11 @@ function parseBuffer(msg) {
         time: data[0],
         car: data[1],
         flags: data[2],
+        gear: getGear(msg.slice(10, 11)[0]),
         player_id: data[4],
-        speed: data[5],
+        speed: mPerSecondToMPH(data[5]),
         rpm: data[6],
-        turbo: data[7],
+        turbo: barToPSI(data[7]),
         engine_temprature: data[8],
         fuel_remaining: data[9],
         oil: {
@@ -58,4 +59,24 @@ function parseBuffer(msg) {
         display_2: data[18],
         id: data[19],
     };
+}
+
+function mPerSecondToMPH(MPS) {
+    return Math.round(MPS * 2.23694);
+}
+
+function barToPSI(bar) {
+    return Math.round(bar * 14.5038 * 100) / 100;
+}
+
+function getGear(gear) {
+    if (gear == 0) {
+        return 'R';
+    }
+
+    if (gear == 1) {
+        return 'N';
+    }
+
+    return gear - 1;
 }
