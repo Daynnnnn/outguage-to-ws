@@ -1,11 +1,29 @@
+import 'dotenv/config'
+import Pusher from "pusher"
 import struct from 'python-struct';
 import udp from 'dgram';
+
+let pusherConfig = {
+    appId: process.env.PUSHER_APP_ID,
+    key: process.env.PUSHER_APP_KEY,
+    secret: process.env.PUSHER_APP_SECRET,
+}
+
+if (process.env.PUSHER_HOST != null) {
+    pusherConfig['host'] = process.env.PUSHER_HOST;
+    pusherConfig['port'] = process.env.PUSHER_PORT ?? 443;
+} else {
+    pusherConfig['cluster'] = process.env.PUSHER_APP_CLUSTER;
+}
+
+const PusherClient = new Pusher(pusherConfig);
 
 const socket = udp.createSocket('udp4');
 
 socket.on('message',function(msg, info){
     let parsedMessage = parseBuffer(msg);
-    console.log(parsedMessage)
+
+    PusherClient.trigger('outguage-stream', 'payload', JSON.stringify(parsedMessage))
 });
 
 socket.bind(4444);
